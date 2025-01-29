@@ -1,6 +1,7 @@
 from scapy.all import sniff, IP, TCP, UDP
 import matplotlib.pyplot as plt
 from collections import defaultdict
+import argparse
 
 # Global variables to store metrics
 total_data = 0
@@ -78,14 +79,23 @@ def generate_metrics():
 
 # Main function
 def main():
-    timeout = int(input("Enter the duration to sniff packets (in seconds): "))
-    interface = input("Enter the interface to sniff packets on: ")
-    print("Starting packet sniffer... Replay traffic now.")
+    parser = argparse.ArgumentParser(description="Packet sniffer")
+    parser.add_argument('-t', '--timeout', type=int, help="Duration to sniff packets (in seconds)")
+    parser.add_argument('-i', '--interface', type=str, help="Interface to sniff packets on")
+    parser.add_argument('-f', '--file', type=str, help="Path to the .pcap file to read packets from")
+    args = parser.parse_args()
 
-    try:
-        sniff(iface=interface, prn=packet_handler, store=False, timeout=timeout)  # Capture for 30 seconds
-    except KeyboardInterrupt:
-        print("\nSniffing stopped manually.")
+    if args.file:
+        print(f"Reading packets from {args.file}...")
+        sniff(offline=args.file, prn=packet_handler, store=False)
+    else:
+        if not args.timeout or not args.interface:
+            parser.error("Interface and timeout must be specified if not reading from a file.")
+        print("Starting packet sniffer... Replay traffic now.")
+        try:
+            sniff(iface=args.interface, prn=packet_handler, store=False, timeout=args.timeout)
+        except KeyboardInterrupt:
+            print("\nSniffing stopped manually.")
     
     generate_metrics()
 
