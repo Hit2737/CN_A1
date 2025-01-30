@@ -13,11 +13,11 @@ CS331 - Computer Networks Assignment 1
 Reading packets from ./0.pcap...
 
 --- Metrics ---
-Total data transferred: 364564032 bytes
-Total packets transferred: 805438
-Min packet size: 54 bytes
-Max packet size: 1514 bytes
-Average packet size: 452.63 bytes
+Total data transferred (bytes): 364635523
+Total packets transferred: 805892
+Min packet size (bytes): 42
+Max packet size (bytes): 1514
+Average packet size (bytes): 452.46
 ```
 
 ```bash
