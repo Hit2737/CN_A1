@@ -1,5 +1,3 @@
 .vscode
 CN_A1_venv/
 *.pcap
-*.csv
-temp*
