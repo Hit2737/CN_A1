@@ -1,49 +1,37 @@
-# Packet Sniffer and Traffic Analysis 🕵️‍♂️📊
+# CN_A1
 
-## Overview 🚀
+CS331 - Computer Networks Assignment 1
 
-This project captures network traffic using a `scapy`-based packet sniffer, analyzes key metrics (e.g., packet size, flow counts), and saves the results in CSV files. It is useful for monitoring replayed traffic using tools like `tcpreplay`. The program tracks metrics like total data transferred, packet sizes, source-destination pairs, and flow counts.
+```bash
+~$ python3 packet_sniffer.py --timeout 10 --interface en0
+~$ python3 packet_sniffer.py -t 10 -i en0
+~$ python3 packet_sniffer.py -file /path/to/file.pcap
+~$ python3 packet_sniffer.py -f /path/to/file.pcap
+```
 
-## Features ✨
+```bash
+Reading packets from ./0.pcap...
 
-- **Capture Packets**: Sniff traffic on a specific network interface for a given duration.
-- **Metrics**: Calculates total data transferred, total packets, min/max/average packet sizes, and tracks source-destination flows.
-- **Flow Counts**: Tracks the number of flows for source and destination IPs.
-- **CSV Output**: Saves metrics, flows, and source-destination data in CSV files for analysis.
-- **Visualization**: Generates and saves a histogram of packet sizes.
+--- Metrics ---
+Total data transferred: 364564032 bytes
+Total packets transferred: 805438
+Min packet size: 54 bytes
+Max packet size: 1514 bytes
+Average packet size: 452.63 bytes
+```
 
-## How It Works 🛠️
+```bash
+tcpreplay -i en0 --topspeed 0.pcap
+```
 
-1. **Capture Traffic**: Uses `scapy.sniff()` to capture packets from a specified network interface.
-2. **Analyze Packets**: Extracts key details like packet size, source/destination IPs, and ports.
-3. **Generate CSVs**: Saves the captured data and metrics in `packet_metrics.csv`, `packet_flows.csv`, and `ip_flows.csv`.
-4. **Plot Data**: Creates a histogram of packet sizes and saves it as an image (`packet_size_distribution.png`).
-
-## Files Generated 📂
-
-- **`packet_metrics.csv`**: Contains overall traffic stats (total data, packet count, etc.).
-- **`packet_flows.csv`**: Lists source-destination pairs and data transferred.
-- **`ip_flows.csv`**: Tracks flow counts for each IP.
-- **`packet_size_distribution.png`**: A histogram of packet sizes.
-
-## Running the Script ⚙️
-
-1. **Install Dependencies**:
-   ```bash
-   pip install scapy matplotlib
-   ```
-
-2. **Run the Script**:
-   ```bash
-   python packet_sniffer.py
-   ```
-
-3. **Replay Traffic**:
-   If you're replaying traffic with `tcpreplay`, start the replay before running the script. The sniffer will capture it during the specified duration.
-   ```bash
-   tcpreplay --intf1=lo --topspeed path/to/pcapfile
-   ```
-
-## License 📜
-
-MIT License.
+```bash
+Actual: 805892 packets (364635582 bytes) sent in 3.23 seconds
+Rated: 112840490.4 Bps, 902.72 Mbps, 249392.14 pps
+Flows: 41680 flows, 12898.33 fps, 805193 unique flow packets, 454 unique non-flow packets
+Statistics for network device: en0
+	Successful packets:        805892
+	Failed packets:            0
+	Truncated packets:         0
+	Retried packets (ENOBUFS): 1664125
+	Retried packets (EAGAIN):  0
+```
