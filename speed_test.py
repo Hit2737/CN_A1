@@ -3,7 +3,7 @@ import argparse
 
 captured = 0
 def packet_handler(pkt):
-    # print(pkt.summary())
+    print(pkt.summary())
     global captured
     captured += 1
 
