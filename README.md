@@ -2,6 +2,10 @@
 
 CS331 - Computer Networks Assignment 1
 
+```sh
+~$ g++ -std=c++17 sniffer.cpp -o sniffer -I/opt/homebrew/include -L/opt/homebrew/lib -lpcap
+```
+
 ```bash
 ~$ python3 packet_sniffer.py --timeout 10 --interface <interface>
 ~$ python3 packet_sniffer.py -t 10 -i <interface>
