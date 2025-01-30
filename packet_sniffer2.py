@@ -107,7 +107,7 @@ def generate_metrics():
 # Main function
 def main():
     timeout = int(input("Enter the duration to sniff packets (in seconds): "))
-    interface = input("Enter the interface to sniff packets on: ")
+    interface = input("Enter the virtual interface to sniff packets on (e.g., veth1): ")
     print("Starting packet sniffer... Replay traffic now.")
 
     try:
