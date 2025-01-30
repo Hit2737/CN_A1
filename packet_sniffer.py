@@ -1,8 +1,8 @@
-from scapy.all import sniff, IP, TCP, UDP
+from scapy.all import sniff, IP, TCP, UDP, IPv6
 import matplotlib.pyplot as plt
 from collections import defaultdict
-import csv
 import argparse
+import json
 
 # Global variables to store metrics
 total_data = 0
@@ -20,11 +20,15 @@ def packet_handler(packet):
     packet_sizes.append(pkt_len)
     total_data += pkt_len
 
-    if IP in packet:
-
+    if IP in packet or IPv6 in packet:
         # Extract source and destination IPs and ports
-        src_ip = packet[IP].src
-        dst_ip = packet[IP].dst
+        if IP in packet:
+            src_ip = packet[IP].src
+            dst_ip = packet[IP].dst
+        else:
+            src_ip = packet[IPv6].src
+            dst_ip = packet[IPv6].dst
+
         src_port = packet[TCP].sport if TCP in packet else (packet[UDP].sport if UDP in packet else None)
         dst_port = packet[TCP].dport if TCP in packet else (packet[UDP].dport if UDP in packet else None)
         
@@ -60,38 +64,26 @@ def generate_metrics():
     plt.savefig("packet_size_distribution.png")
 
     # Save metrics to CSV
-    with open("packet_metrics.csv", "w", newline="") as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["Metric", "Value"])
-        csvwriter.writerow(["Total data transferred (bytes)", total_data])
-        csvwriter.writerow(["Total packets transferred", total_packets])
-        csvwriter.writerow(["Min packet size (bytes)", min_pkt_size])
-        csvwriter.writerow(["Max packet size (bytes)", max_pkt_size])
-        csvwriter.writerow(["Average packet size (bytes)", avg_pkt_size])
+    with open("packet_metrics.txt", "w") as txtfile:
+        txtfile.write(f"Total data transferred (bytes): {total_data}\n")
+        txtfile.write(f"Total packets transferred: {total_packets}\n")
+        txtfile.write(f"Min packet size (bytes): {min_pkt_size}\n")
+        txtfile.write(f"Max packet size (bytes): {max_pkt_size}\n")
+        txtfile.write(f"Average packet size (bytes): {avg_pkt_size:.2f}\n")
     
-    # Save unique source-destination pairs and flows to CSV
-    with open("packet_flows.csv", "w", newline="") as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["Source-Destination Pair", "Total Data (bytes)"])
-        for pair, data in src_dst_pairs.items():
-            csvwriter.writerow([pair, data])
+    # Save unique source-destination pairs and flows to JSON
+    with open("packet_flows.json", "w") as jsonfile:
+        json.dump(src_dst_pairs, jsonfile, indent=4)
     
-    # Save flow counts to CSV (source and destination IP flows)
-    with open("ip_flows.csv", "w", newline="") as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["IP Address", "Flows"])
-        for ip, flows in src_flows.items():
-            csvwriter.writerow([ip, flows])
-        for ip, flows in dst_flows.items():
-            csvwriter.writerow([ip, flows])
+    # Save flow counts to JSON (source and destination IP flows)
+    with open("ip_flows.json", "w") as jsonfile:
+        json.dump({"src_flows": src_flows, "dst_flows": dst_flows}, jsonfile, indent=4)
 
 
     # Source-destination pair with the most data
     if src_dst_pairs:
         max_data_pair = max(src_dst_pairs, key=src_dst_pairs.get)
         print(f"\nSource-Destination pair with most data: {max_data_pair} ({src_dst_pairs[max_data_pair]} bytes)")
-
-    print("\nMetrics saved to 'packet_metrics.csv', 'packet_flows.csv', and 'ip_flows.csv'.")
 
 # Main function
 def main():
