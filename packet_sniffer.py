@@ -15,12 +15,12 @@ dst_flows = defaultdict(int)
 # Packet handler function
 def packet_handler(packet):
     global total_data, total_packets, packet_sizes, src_dst_pairs, src_flows, dst_flows
-    
+    total_packets += 1
+    pkt_len = len(packet)
+    packet_sizes.append(pkt_len)
+    total_data += pkt_len
+
     if IP in packet:
-        total_packets += 1
-        pkt_len = len(packet)
-        packet_sizes.append(pkt_len)
-        total_data += pkt_len
 
         # Extract source and destination IPs and ports
         src_ip = packet[IP].src
@@ -85,18 +85,6 @@ def generate_metrics():
         for ip, flows in dst_flows.items():
             csvwriter.writerow([ip, flows])
 
-    # Print summary
-    print("\n--- Unique Source-Destination Pairs ---")
-    for pair, data in src_dst_pairs.items():
-        print(f"{pair}: {data} bytes")
-
-    print("\n--- Flows Per IP ---")
-    print("Source IP Flows:")
-    for ip, flows in src_flows.items():
-        print(f"{ip}: {flows} flows")
-    print("Destination IP Flows:")
-    for ip, flows in dst_flows.items():
-        print(f"{ip}: {flows} flows")
 
     # Source-destination pair with the most data
     if src_dst_pairs:
