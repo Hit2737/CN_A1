@@ -1,95 +1,70 @@
 from scapy.all import sniff, IP, TCP, UDP, IPv6
 import time
 import argparse
-import json
 
 # Performance tracking variables
 total_packets = 0
 total_data = 0
 start_time = None
-pps_values = []
-mbps_values = []
-packet_loss_stats = {"sent": 0, "received": 0, "loss": 0, "loss_percentage": 0.0}
 
 # Packet handler function
 def packet_handler(packet):
     global total_packets, total_data, start_time
 
     if start_time is None:
-        start_time = time.time()  # Start tracking when the first packet arrives
+        start_time = time.time()
+
+    # Ignoring localhost traffic (127.0.0.1 and ::1)
+    if (IP in packet and (packet[IP].src == "127.0.0.1" or packet[IP].dst == "127.0.0.1")) or (IPv6 in packet and (packet[IPv6].src == "::1" or packet[IPv6].dst == "::1")):
+        return
+    
+    # mDNS (Multicast DNS) uses 224.0.0.251 (IPv4) and ff02::fb (IPv6) on UDP port 5353.
+    # To filter out mDNS packets, we add checks for:
+
+    # IPv4: packet[IP].dst == "224.0.0.251"
+    # IPv6: packet[IPv6].dst == "ff02::fb"
+    # UDP Port 5353: packet[UDP].dport == 5353
+    
+    if (IP in packet and packet[IP].dst == "224.0.0.251") or (IPv6 in packet and packet[IPv6].dst == "ff02::fb"):
+        return
+
+    if UDP in packet and packet[UDP].dport == 5353:
+        return
 
     total_packets += 1
     pkt_len = len(packet)
     total_data += pkt_len
-    # print(packet.summary())
+    print(packet.summary())
 
-# Function to calculate real-time performance metrics
+
 def compute_performance(duration):
-    global total_packets, total_data
-
-    if duration == 0:
+    if duration <= 0 or total_packets == 0:
+        print("\n--- Performance Metrics ---")
+        print("No packets captured.")
         return
 
-    # Packets per second (pps)
-    pps = total_packets / duration
-    pps_values.append(pps)
-
-    # Megabits per second (Mbps)
-    mbps = (total_data * 8) / (duration * 1e6)  # Convert bytes to megabits
-    mbps_values.append(mbps)
-
-    print(f"\n--- Performance Metrics ---")
+    print("\n--- Performance Metrics ---")
     print(f"Total Packets Received: {total_packets}")
-    print(f"Total Data: {total_data} bytes")
-    print(f"Packets per second (pps): {pps:.2f}")
-    print(f"Throughput (Mbps): {mbps:.2f}")
+    print(f"Total Data: {total_data} bytes ({total_data / 1024:.2f} KB)")
 
-    # Save to a JSON file
-    with open("performance_metrics.json", "w") as jsonfile:
-        json.dump({"pps": pps_values, "mbps": mbps_values}, jsonfile, indent=4)
 
-# Function to compare with tcpreplay stats
-def compute_packet_loss(tcpreplay_sent):
-    global packet_loss_stats
-
-    received = total_packets
-    loss = tcpreplay_sent - received
-    loss_percentage = (loss / tcpreplay_sent) * 100 if tcpreplay_sent > 0 else 0
-
-    packet_loss_stats.update({
-        "sent": tcpreplay_sent,
-        "received": received,
-        "loss": loss,
-        "loss_percentage": loss_percentage
-    })
-
-    print(f"\n--- Packet Loss Stats ---")
-    print(f"Packets Sent (tcpreplay): {tcpreplay_sent}")
-    print(f"Packets Received: {received}")
-    print(f"Packet Loss: {loss} packets ({loss_percentage:.2f}%)")
-
-    with open("packet_loss.json", "w") as jsonfile:
-        json.dump(packet_loss_stats, jsonfile, indent=4)
-
-# Main function
 def main():
+    global start_time
+
     parser = argparse.ArgumentParser(description="Packet sniffer for performance testing")
-    parser.add_argument('-t', '--timeout', type=int, help="Duration to sniff packets (in seconds)", required=True)
-    parser.add_argument('-i', '--interface', type=str, help="Interface to sniff packets on", required=True)
-    # parser.add_argument('-s', '--tcpreplay_sent', type=int, help="Packets sent by tcpreplay (for loss calc)", required=True)
+    parser.add_argument('-t', '--timeout', type=int, required=True, help="Duration to sniff packets (in seconds)")
+    parser.add_argument('-i', '--interface', type=str, required=True, help="Interface to sniff packets on")
 
     args = parser.parse_args()
 
     print(f"Starting packet capture on {args.interface} for {args.timeout} seconds...")
-    
-    # Start packet sniffing
+
     start_time = time.time()
     sniff(iface=args.interface, prn=packet_handler, store=False, timeout=args.timeout)
     duration = time.time() - start_time
 
-    # # Compute and display performance
     compute_performance(duration)
-    # compute_packet_loss(args.tcpreplay_sent)
+
 
 if __name__ == "__main__":
     main()
