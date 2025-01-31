@@ -1,5 +1,0 @@
-Total data transferred (bytes): 364635523
-Total packets transferred: 805892
-Min packet size (bytes): 42
-Max packet size (bytes): 1514
-Average packet size (bytes): 452.46
