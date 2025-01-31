@@ -7,14 +7,18 @@
 #include <cstring>
 #include <vector>
 #include <ctime>
-#include <linux/if_packet.h>
+#include <netinet/if_ether.h>
 #include <net/if.h>
+#include <linux/if_packet.h>
 #include <sys/ioctl.h>
+#include <algorithm>
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
+int main(int argc, char *argv[])
+{
+    if (argc != 3)
+    {
         cerr << "Usage: " << argv[0] << " <interface> <duration_in_seconds>\n";
         return 1;
     }
@@ -29,7 +33,8 @@ int main(int argc, char *argv[]) {
 
     // Create raw socket
     raw_socket = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (raw_socket < 0) {
+    if (raw_socket < 0)
+    {
         perror("Socket creation failed");
         return 1;
     }
@@ -37,7 +42,8 @@ int main(int argc, char *argv[]) {
     // Bind socket to specified interface
     struct ifreq ifr;
     strncpy(ifr.ifr_name, interface.c_str(), IFNAMSIZ);
-    if (ioctl(raw_socket, SIOCGIFINDEX, &ifr) < 0) {
+    if (ioctl(raw_socket, SIOCGIFINDEX, &ifr) < 0)
+    {
         perror("Interface binding failed");
         close(raw_socket);
         return 1;
@@ -48,7 +54,8 @@ int main(int argc, char *argv[]) {
     sock_addr.sll_protocol = htons(ETH_P_ALL);
     sock_addr.sll_ifindex = ifr.ifr_ifindex;
 
-    if (bind(raw_socket, (struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0) {
+    if (bind(raw_socket, (struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0)
+    {
         perror("Failed to bind socket to interface");
         close(raw_socket);
         return 1;
@@ -61,9 +68,11 @@ int main(int argc, char *argv[]) {
     vector<int> packet_sizes;
     time_t start_time = time(0);
 
-    while (difftime(time(0), start_time) < duration) {
+    while (difftime(time(0), start_time) < duration)
+    {
         ssize_t packet_size = recvfrom(raw_socket, buffer, sizeof(buffer), 0, &saddr, &saddr_size);
-        if (packet_size > 0) {
+        if (packet_size > 0)
+        {
             total_packets++;
             total_data += packet_size;
             packet_sizes.push_back(packet_size);
