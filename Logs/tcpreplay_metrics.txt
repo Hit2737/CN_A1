@@ -1,10 +1,3 @@
-Total data transferred (bytes): 364635523
-Total packets transferred: 805892
-Min packet size (bytes): 42
-Max packet size (bytes): 1514
-Average packet size (bytes): 452.46
-
-
 ~$ sudo tcpreplay -i lo0 --topspeed 0.pcap
 >>
 Actual: 805995 packets (364641929 bytes) sent in 1.03 seconds

@@ -61,7 +61,6 @@ def question_2(packet):
     
     total_packets += 1
     total_data += len(packet)
-    print(packet.summary())
 
     ims_ip = "10.0.137.79"
     
@@ -90,6 +89,8 @@ def question_2(packet):
             payload = packet[Raw].load.decode(errors='ignore')
             super_users += payload.lower().count("superuser")
 
+    print(packet.summary())
+    
 def log_question2_metrics():
     global port_packets, unique_conn_to_ims, all_ims_packets, ims_dst_packets, super_users, start_time, total_packets, total_data
     """Logs the results from question_2 packet capture"""
