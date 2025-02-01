@@ -167,9 +167,9 @@ def main():
     finally:
         # Ensure we log the metrics even if interrupted
         duration = time.time() - start_time
-        compute_performance(duration)
         if args.question == 2:
             log_question2_metrics()
+        compute_performance(duration)
 
 if __name__ == "__main__":
     main()

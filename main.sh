@@ -21,22 +21,30 @@ fi
 # Get the current directory where the script was executed
 SCRIPT_DIR=$(pwd)
 
-# Construct sniffer command
-SNIFFER_CMD="sudo python3 sniffer_speed.py -i $INTERFACE"
+# If a virtual environment exists in the current directory, prepare the source command.
+if [ -d "$SCRIPT_DIR/venv" ]; then
+  VENV_CMD="source $SCRIPT_DIR/venv/bin/activate && "
+else
+  VENV_CMD=""
+fi
+
+# Construct sniffer command.
+# Use sudo $(which python3) so that the correct python is used.
+SNIFFER_CMD="${VENV_CMD}sudo $(which python3) sniffer_speed.py -i $INTERFACE"
 [ -n "$TIMEOUT" ] && SNIFFER_CMD+=" -t $TIMEOUT"
 [ -n "$QUESTION" ] && SNIFFER_CMD+=" -q $QUESTION"
 
 # Determine replay speed: Use Mbps if provided, otherwise use PPS
 if [ -n "$MBPS" ]; then
-  REPLAY_CMD="sudo tcpreplay -i $INTERFACE --mbps=$MBPS --quiet 0.pcap"
+  REPLAY_CMD="${VENV_CMD}sudo tcpreplay -i $INTERFACE --mbps=$MBPS --quiet 0.pcap"
 elif [ -n "$PPS" ]; then
-  REPLAY_CMD="sudo tcpreplay -i $INTERFACE --pps=$PPS --quiet 0.pcap"
+  REPLAY_CMD="${VENV_CMD}sudo tcpreplay -i $INTERFACE --pps=$PPS --quiet 0.pcap"
 else
   echo "Error: Either -p (pps) or -m (mbps) must be specified."
   exit 1
 fi
 
-# Start sniffer in a new terminal in the same directory
+# Start sniffer in a new terminal in the same directory with venv activated
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS: Open Terminal window
   osascript -e "tell application \"Terminal\" to do script \"cd '$SCRIPT_DIR' && $SNIFFER_CMD\""
@@ -48,7 +56,7 @@ fi
 # Wait for sniffer to start
 sleep 2
 
-# Start tcpreplay in a new terminal in the same directory
+# Start tcpreplay in a new terminal in the same directory with venv activated
 if [[ "$OSTYPE" == "darwin"* ]]; then
   osascript -e "tell application \"Terminal\" to do script \"cd '$SCRIPT_DIR' && $REPLAY_CMD\""
 else
@@ -60,11 +68,13 @@ if [ -n "$TIMEOUT" ]; then
   sleep "$TIMEOUT"
 fi
 
-# Kill tcpreplay if still running
-TCREPLAY_PID=$(pgrep -f "tcpreplay -i $INTERFACE")
-if [ -n "$TCREPLAY_PID" ]; then
+# Kill all tcpreplay processes matching the interface
+TCREPLAY_PIDS=$(pgrep -f "tcpreplay -i $INTERFACE")
+if [ -n "$TCREPLAY_PIDS" ]; then
   echo "Stopping tcpreplay..."
-  kill "$TCREPLAY_PID"
+  for pid in $TCREPLAY_PIDS; do
+    kill "$pid"
+  done
 fi
 
 echo "Sniffer and replay session completed."
