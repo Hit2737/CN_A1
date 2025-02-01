@@ -37,10 +37,12 @@ chmod +x main.sh
 
 ### Example (these were all we ran):
 
+**This first command runs completely fine on Mac.**
 ```bash
 ./main.sh -i lo -p 1900 -t 430
 ```
 
+**These two commands run perfectly in Linux just that Linux's Loopback duplicates packets that our sniffer has not filtered out.**
 ```bash
 ./main.sh -i lo -p 1900 -t 430 -q 1
 ```
@@ -51,6 +53,26 @@ chmod +x main.sh
 This runs the sniffer on `lo`, replays packets at 1900 PPS, runs for 430 seconds, and collects metrics for question 1.
 
 ---
+
+## Demonstration
+### **ALL THE PACKETS ARE RECEIVED WITHOUT LOSS OVER MAC's LOOPBACK `lo0`**
+
+```bash
+./main.sh -i lo -p 1900 -t 430
+```
+
+<div align = "center">
+    <img src = "https://github.com/Hit2737/CN_A1/blob/main/Images_Guntas/main.png" style="width: 100%">
+</div>
+
+<div align = "center">
+    <img src = "https://github.com/Hit2737/CN_A1/blob/main/Images_Guntas/windows.png" style="width: 100%">
+</div>
+
+<div align = "center">
+    <img src = "https://github.com/Hit2737/CN_A1/blob/main/Images_Guntas/done.png" style="width: 100%">
+</div>
+
 
 ## Manual Execution
 
