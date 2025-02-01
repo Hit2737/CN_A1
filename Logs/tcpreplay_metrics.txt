@@ -9,3 +9,192 @@ Statistics for network device: lo0
 	Truncated packets:         0
 	Retried packets (ENOBUFS): 0
 	Retried packets (EAGAIN):  0
+
+
+~$ python3 sniffer_speed.py -f 0.pcap -q 1
+>>
+--- Metrics ---
+Total data transferred: 364632128 bytes //364641929 bytes
+Total packets transferred: 805963
+Min packet size: 42 bytes
+Max packet size: 1514 bytes
+Average packet size: 452.42 bytes
+
+--- Packet Size Distribution Percentiles ---
+50th percentile: 106.0 bytes
+75th percentile: 868.0 bytes
+90th percentile: 1514.0 bytes
+95th percentile: 1514.0 bytes
+99th percentile: 1514.0 bytes
+
+Most packets lie between 60.0 and 868.0 bytes
+
+Source-Destination pair with most data: 172.16.133.95:49358 -> 157.56.240.102:443 (17342229 bytes)
+
+--- Performance Metrics ---
+----------------------------
+Total Packets Received: 805963
+Total Data: 364632128 bytes (356086.06 KB)
+----------------------------
+
+
+~$ python3 sniffer_speed.py -f 0.pcap -q 2
+>>
+--- Question 2 Metrics ---
+
+All packets destined to IMS server:
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+All packets both from and to IMS server:
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S / Raw
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+Unique connections to IMS server (with their connection counts):
+defaultdict(<class 'int'>, {'10.1.12.123:1234 -> 10.0.137.79:4321': 30})
+
+All packets transferred on port 4321 (both src and dst):
+Ether / IP / UDP 172.16.128.169:rwhois > 172.16.133.248:snmp / SNMP
+Ether / IP / UDP 172.16.133.248:snmp > 172.16.128.169:rwhois / SNMP
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S / Raw
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+----------Summary------------
+Q1: Unique Packets Destined to IMS server: 30
+Q2: Course registered on IMS is:
+course = Embedded_system
+Q3: Total data transferred on port 4321: 2970 bytes
+Q4: Total number of SuperUsers: 69
+
+-----------------------------
+
+
+--- Performance Metrics ---
+----------------------------
+Total Packets Received: 805963
+Total Data: 364632128 bytes (356086.06 KB)
+----------------------------
