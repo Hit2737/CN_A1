@@ -5,17 +5,25 @@ import time
 import argparse
 from collections import defaultdict
 from pprint import pprint
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import json
 
 # Performance tracking variables
 total_packets = 0
-total_data = 0  # Total data in bytes
-start_time = None
+total_data = 0
 
 port_packets = []
 unique_conn_to_ims = defaultdict(int)
 all_ims_packets = []
 ims_dst_packets = []
 super_users = 0
+
+packet_sizes = []
+src_dst_pairs = defaultdict(int)
+src_flows = defaultdict(int)
+dst_flows = defaultdict(int)
 
 IMS_IP = "10.0.137.79"
 
@@ -162,24 +170,91 @@ def traffic_packet(info):
 
 def packet_handler(info):
     """Handles packet processing for performance monitoring."""
-    global total_packets, total_data, start_time
-    if start_time is None:
-        start_time = time.time()
+    global total_packets, total_data, packet_sizes, src_dst_pairs, src_flows, dst_flows
 
     if traffic_packet(info):
         return
 
     total_packets += 1
-    total_data += info.get("raw_length", 0)
+    pkt_len = info.get("raw_length", 0)
+    packet_sizes.append(pkt_len)
+    total_data += pkt_len
+
+    src_ip = info.get('src_ip', '')
+    dst_ip = info.get('dst_ip', '')
+    src_port = info.get('src_port', None)
+    dst_port = info.get('dst_port', None)
+
+    if src_ip and dst_ip:
+        if src_port and dst_port:
+            src_dst_pairs[f"{src_ip}:{src_port} -> {dst_ip}:{dst_port}"] += pkt_len
+        
+        src_flows[src_ip] += 1
+        dst_flows[dst_ip] += 1
+
     print(get_packet_summary(info))
+
+def log_question1_metrics():
+    global total_data, total_packets, packet_sizes, src_dst_pairs, src_flows, dst_flows
+    
+    min_pkt_size = min(packet_sizes) if packet_sizes else 0
+    max_pkt_size = max(packet_sizes) if packet_sizes else 0
+    avg_pkt_size = sum(packet_sizes) / len(packet_sizes) if packet_sizes else 0
+
+    print("\n--- Metrics ---")
+    print(f"Total data transferred: {total_data} bytes")
+    print(f"Total packets transferred: {total_packets}")
+    print(f"Min packet size: {min_pkt_size} bytes")
+    print(f"Max packet size: {max_pkt_size} bytes")
+    print(f"Average packet size: {avg_pkt_size:.2f} bytes")
+
+    # Save packet size distribution plot using seaborn
+    plt.figure(figsize=(10, 6))
+    sns.histplot(packet_sizes, kde=True, bins=20, edgecolor="black", color="lightcoral")
+    plt.title("Packet Size Distribution")
+    plt.xlabel("Packet Size (bytes)")
+    plt.ylabel("Frequency")
+    plt.savefig("packet_size_distribution.png", dpi=600)
+    plt.show()
+
+    # Describe the distribution using percentiles
+    percentiles = [50, 75, 90, 95, 99]
+    percentile_values = {p: np.percentile(packet_sizes, p) for p in percentiles}
+
+    print("\n--- Packet Size Distribution Percentiles ---")
+    for p, value in percentile_values.items():
+        print(f"{p}th percentile: {value} bytes")
+
+    most_packets_range = (np.percentile(packet_sizes, 25), np.percentile(packet_sizes, 75))
+    print(f"\nMost packets lie between {most_packets_range[0]} and {most_packets_range[1]} bytes")
+
+    with open("./Logs/packet_metrics.txt", "w") as txtfile:
+        txtfile.write(f"Total data transferred (bytes): {total_data}\n")
+        txtfile.write(f"Total packets transferred: {total_packets}\n")
+        txtfile.write(f"Min packet size (bytes): {min_pkt_size}\n")
+        txtfile.write(f"Max packet size (bytes): {max_pkt_size}\n")
+        txtfile.write(f"Average packet size (bytes): {avg_pkt_size:.2f}\n")
+
+    if src_dst_pairs:
+        max_data_pair = max(src_dst_pairs, key=src_dst_pairs.get)
+        print(f"\nSource-Destination pair with most data: {max_data_pair} ({src_dst_pairs[max_data_pair]} bytes)")
+        
+    sorted_src_dst_pairs = dict(sorted(src_dst_pairs.items(), key=lambda x: x[1], reverse=True))
+    with open("./JSON/packet_flows.json", "w") as jsonfile:
+        json.dump(sorted_src_dst_pairs, jsonfile, indent=4)
+        
+    sorted_src_flows = dict(sorted(src_flows.items(), key=lambda x: x[1], reverse=True))
+    with open("./JSON/src_flows.json", "w") as jsonfile:
+        json.dump(sorted_src_flows, jsonfile, indent=4)
+    
+    sorted_dst_flows = dict(sorted(dst_flows.items(), key=lambda x: x[1], reverse=True))
+    with open("./JSON/dst_flows.json", "w") as jsonfile:
+        json.dump(sorted_dst_flows, jsonfile, indent=4)
 
 def question_2(info):
     """Handles packet processing for IMS-related analysis."""
-    global total_packets, total_data, start_time, port_packets
+    global total_packets, total_data, port_packets
     global unique_conn_to_ims, all_ims_packets, ims_dst_packets, super_users
-
-    if start_time is None:
-        start_time = time.time()
 
     if traffic_packet(info):
         return
@@ -252,10 +327,10 @@ def log_question2_metrics():
     print(f"Q4: Total number of SuperUsers: {super_users}")
     print("\n-----------------------------\n")
 
-def compute_performance(duration):
+def compute_performance():
     """Computes and displays performance metrics."""
     print("\n--- Performance Metrics ---")
-    if duration <= 0 or total_packets == 0:
+    if total_packets == 0:
         print("----------------------------")
         print("No packets captured.")
         print("----------------------------")
@@ -302,16 +377,19 @@ def main():
 
             if question == 0:
                 packet_handler(packet_info)
+            elif question == 1:
+                packet_handler(packet_info)
             elif question == 2:
                 question_2(packet_info)
     except KeyboardInterrupt:
         print("\nPacket capture interrupted by user.")
     finally:
-        duration = time.time() - start_time
-        if question == 2:
+        if question == 1:
+            log_question1_metrics()
+        elif question == 2:
             log_question2_metrics()
         sniffer.close()
-        compute_performance(duration)
+        compute_performance()
 
 if __name__ == "__main__":
     main()
