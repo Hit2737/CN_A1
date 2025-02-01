@@ -68,13 +68,13 @@ if [ -n "$TIMEOUT" ]; then
   sleep "$TIMEOUT"
 fi
 
-# Kill all tcpreplay processes matching the interface
-TCREPLAY_PIDS=$(pgrep -f "tcpreplay -i $INTERFACE")
-if [ -n "$TCREPLAY_PIDS" ]; then
-  echo "Stopping tcpreplay..."
-  for pid in $TCREPLAY_PIDS; do
-    kill "$pid"
-  done
-fi
+# # Kill all tcpreplay processes matching the interface
+# TCREPLAY_PIDS=$(pgrep -f "tcpreplay -i $INTERFACE")
+# if [ -n "$TCREPLAY_PIDS" ]; then
+#   echo "Stopping tcpreplay..."
+#   for pid in $TCREPLAY_PIDS; do
+#     kill "$pid"
+#   done
+# fi
 
 echo "Sniffer and replay session completed."

@@ -56,6 +56,10 @@ def packet_handler(packet):
 
 def question1(packet):
     global total_data, total_packets, packet_sizes, src_dst_pairs, src_flows, dst_flows
+    
+    if traffic_packet(packet):
+        return
+    
     total_packets += 1
     pkt_len = len(packet)
     packet_sizes.append(pkt_len)
