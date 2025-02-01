@@ -1,95 +1,108 @@
 # CS331 - Computer Networks Assignment 1
 ## Guntas Singh Saran (22110089) & Hitesh Kumar (22110098)
 
+This guide explains how to execute the `main.sh` script to automate packet sniffing with `sniffer_speed.py` and packet replay with `tcpreplay`. It also includes manual steps for running these tools separately.
 
-# Packet Sniffer & Traffic Replay Automation
+**[0.pcap File](https://drive.google.com/file/d/1RYzeM1c66SWBhli8TADAGDsRPSjP3x2e/view?usp=drive_link)**
 
-This guide explains how to execute the `main.sh` script, which automates the process of running a packet sniffer (`sniffer_speed.py`) and replaying network traffic using `tcpreplay`.
+## Optimal Configuration
+- **Optimal PPS:** We've found **1900 PPS** to be the highest rate at which our packet sniffer does not drop packets.
+- **Replay Duration:** This corresponds to `tcpreplay` running for approximately **420.20 seconds**.
+- **Timeout Recommendation:** Set the timeout a **few seconds beyond 420 seconds to ensure `sniffer_speed.py` starts before `tcpreplay`**.
 
-## Prerequisites
+## Usage Instructions
 
-- **Operating System:** Linux or macOS
-- **Dependencies:**
-  - `tcpreplay`
-  - `python3`
-  - Virtual environment (optional, but recommended)
+### Recommended Interface
+- **macOS:** Use the **loopback interface `lo0`**. (Works best!)
+- **Linux:** Use the **loopback interface `lo`**. (Sends some duplicate packets too)
 
-Ensure you have `gnome-terminal` installed for Linux or Terminal for macOS.
+**We suggest loopback because the code filters loopback traffic. If using another interface, ensure there's no other network traffic to avoid interference.**
 
-## Script Overview
-
-The `main.sh` script performs the following tasks:
-1. Starts a packet sniffer in a new terminal.
-2. Replays network traffic (`0.pcap` file) at a specified speed using `tcpreplay`.
-3. Manages virtual environments if present.
-
-## Usage
+### Running the Script
 
 ```bash
 chmod +x main.sh
 ```
+
 ```bash
 ./main.sh -i <interface> -p <pps> [-m <mbps>] [-t <timeout>] [-q <question>]
 ```
 
-### Required Flags
+#### Flags:
+- `-i <interface>`: **(Required)** Network interface to sniff/replay packets. Use `lo0` (macOS) or `lo` (Linux).
+- `-p <pps>`: **(Required if `-m` not provided)** Packets per second for `tcpreplay`.
+- `-m <mbps>`: **(Optional)** Mbps rate for `tcpreplay` (alternative to `-p`).
+- `-t <timeout>`: **(Optional)** Duration (in seconds) for running the sniffer and replay.
+- `-q <question>`: **(Optional)** Specify `1` or `2` to get metrics for specific questions. If omitted, only basic metrics are collected.
 
-- `-i <interface>`: **(Required)** Network interface **[we suggest LOOPBACK `lo0` (in macOS) and `lo` (in Linux)]** to capture/replay traffic (e.g., lo0`, `en0`, `eth0`, `wlan0`).
-- `-p <pps>`: **(Required if `-m` is not provided)** Packets per second for `tcpreplay`, we have figured out **`--pps=1900`** for loss-less tranfer.
-- `-q <question>`: Passes a custom question argument to `sniffer_speed.py`, you can specify to replicate the results of question 1 or question 2 (CTF).
-
-### Optional Flags
-
-- `-m <mbps>`: Replay speed in megabits per second (overrides `-p` if provided).
-- `-t <timeout>`: Duration in seconds to run the sniffer and replay (automatically stops after timeout).
-
-### Usage Example
-
-1. **Replay using the specified 1900 packets per second and 425 seconds timeout to answer Question 1:**
-   ```bash
-   ./main.sh -i lo0 -p 1900 -t 425 -q 1
-   ```
-   
-2. **Replay using the specified 1900 packets per second and 425 seconds timeout to answer Question 2:**
-   ```bash
-   ./main.sh -i lo0 -p 1900 -t 425 -q 2
-   ```
-   
-3. **Replay using the specified 1900 packets per second to answer Question 2:**
-   ```bash
-    ./main.sh -i lo0 -p 1900 -t 425 -q 2
-   ```
-   Here you need to interrupt by `<Ctrl-C>` to stop the 
-
-## Virtual Environment Handling
-
-- If a `venv/` directory exists in the current script directory, it will automatically activate it before running Python or `tcpreplay` commands.
-
-## Important Notes
-
-- **PCAP File:** Ensure `0.pcap` exists in the script directory, as it's the file replayed.
-- **Permissions:** The script uses `sudo` for privileged operations. You may be prompted for your password.
-- **Compatibility:** For Linux systems, `gnome-terminal` is required. For macOS, the script uses AppleScript to open new Terminal windows.
-
-## Stopping the Script
-
-If you need to manually stop the processes:
-
-- Use `Ctrl+C` in the respective terminal windows.
-- Uncomment the `kill` section at the end of the script to enable automatic termination of `tcpreplay` processes.
-
-## Manual Running of Scripts
-
-- **Permission Errors:** Ensure you have the necessary privileges to capture/replay packets.
-- **Missing Dependencies:** Install `tcpreplay` and `gnome-terminal` if errors occur during execution.
-
----
+### Example (these were all we ran):
 
 ```bash
-tcpreplay -i en0 --topspeed 0.pcap
+./main.sh -i lo -p 1900 -t 430
 ```
 
 ```bash
+./main.sh -i lo -p 1900 -t 430 -q 1
+```
+
+```bash
+./main.sh -i lo -p 1900 -t 430 -q 2
+```
+This runs the sniffer on `lo`, replays packets at 1900 PPS, runs for 430 seconds, and collects metrics for question 1.
+
+---
+
+## Manual Execution
+
+### 1. Start Packet Sniffer
+Open the first terminal:
+
+```bash
+python3 sniffer_speed.py -i lo -t 430 -q 1
+```
+
+- `-i lo`: Interface to sniff packets.
+- `-t 430`: Run for 430 seconds.
+- `-q 1`: Collect metrics for question 1.
+
+### 2. Start Packet Replay
+Open a second terminal:
+
+```bash
+sudo tcpreplay -i lo --pps=1900 --quiet 0.pcap
+```
+
+- `-i lo`: Interface to replay packets.
+- `--pps=1900`: Replay rate.
+- `0.pcap`: The pcap file to replay.
+
+### 3. Alternative: Sniffing Offline PCAP (No Replay)
+If you prefer not to run `tcpreplay` (not recommended), you can sniff packets from an offline pcap file:
+
+```bash
+python3 sniffer_speed.py -f 0.pcap -q 1
+```
+
+- `-f 0.pcap`: Read packets from the pcap file.
+- `-q 1`: Collect metrics for question 1.
+
+---
+
+## Final Notes
+- Ensure Python virtual environment (`venv`) is activated if present.
+- Use `sudo` for commands requiring elevated permissions.
+- Adjust `timeout` based on your replay duration.
+
+---
+
+# Our Results
+
+```bash
+~$ sudo tcpreplay -i lo0 --topspeed 0.pcap
+```
+
+```
+>>
 Actual: 805995 packets (364641929 bytes) sent in 1.03 seconds
 Rated: 353074502.1 Bps, 2824.59 Mbps, 780426.66 pps
 Flows: 41747 flows, 40422.67 fps, 805296 unique flow packets, 454 unique non-flow packets
@@ -101,14 +114,200 @@ Statistics for network device: lo0
 	Retried packets (EAGAIN):  0
 ```
 
+
 ```bash
-Actual: 805892 packets (364635582 bytes) sent in 3.23 seconds
-Rated: 112840490.4 Bps, 902.72 Mbps, 249392.14 pps
-Flows: 41680 flows, 12898.33 fps, 805193 unique flow packets, 454 unique non-flow packets
-Statistics for network device: en0
-	Successful packets:        805892
-	Failed packets:            0
-	Truncated packets:         0
-	Retried packets (ENOBUFS): 1664125
-	Retried packets (EAGAIN):  0
+~$ python3 sniffer_speed.py -f 0.pcap -q 1
+```
+
+```
+>>
+--- Metrics ---
+Total data transferred: 364632128 bytes //364641929 bytes
+Total packets transferred: 805963
+Min packet size: 42 bytes
+Max packet size: 1514 bytes
+Average packet size: 452.42 bytes
+
+--- Packet Size Distribution Percentiles ---
+50th percentile: 106.0 bytes
+75th percentile: 868.0 bytes
+90th percentile: 1514.0 bytes
+95th percentile: 1514.0 bytes
+99th percentile: 1514.0 bytes
+
+Most packets lie between 60.0 and 868.0 bytes
+
+Source-Destination pair with most data: 172.16.133.95:49358 -> 157.56.240.102:443 (17342229 bytes)
+
+--- Performance Metrics ---
+----------------------------
+Total Packets Received: 805963
+Total Data: 364632128 bytes (356086.06 KB)
+----------------------------
+```
+
+```bash
+~$ python3 sniffer_speed.py -f 0.pcap -q 2
+```
+
+```
+>>
+--- Question 2 Metrics ---
+
+All packets destined to IMS server:
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+All packets both from and to IMS server:
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S / Raw
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+Unique connections to IMS server (with their connection counts):
+defaultdict(<class 'int'>, {'10.1.12.123:1234 -> 10.0.137.79:4321': 30})
+
+All packets transferred on port 4321 (both src and dst):
+Ether / IP / UDP 172.16.128.169:rwhois > 172.16.133.248:snmp / SNMP
+Ether / IP / UDP 172.16.133.248:snmp > 172.16.128.169:rwhois / SNMP
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S / Raw
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.0.137.79:rwhois > 10.1.12.123:search_agent S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+Ether / IP / TCP 10.1.12.123:search_agent > 10.0.137.79:rwhois S
+
+----------Summary------------
+Q1: Unique Packets Destined to IMS server: 30
+Q2: Course registered on IMS is:
+course = Embedded_system
+Q3: Total data transferred on port 4321: 2970 bytes
+Q4: Total number of SuperUsers: 69
+
+-----------------------------
+
+
+--- Performance Metrics ---
+----------------------------
+Total Packets Received: 805963
+Total Data: 364632128 bytes (356086.06 KB)
+----------------------------
 ```
